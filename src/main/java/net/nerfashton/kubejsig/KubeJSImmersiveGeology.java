@@ -6,4 +6,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(KubeJSImmersiveGeology.MODID)
 public class KubeJSImmersiveGeology {
     public static final String MODID = "kubejs_immersive_geology";
+
+    public static void init() {
+    }
 }
