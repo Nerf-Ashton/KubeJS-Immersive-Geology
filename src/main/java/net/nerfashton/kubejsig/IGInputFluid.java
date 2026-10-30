@@ -1,12 +1,11 @@
 package net.nerfashton.kubejsig;
 
 import blusunrize.immersiveengineering.api.crafting.FluidTagInput;
-import dev.architectury.fluid.FluidStack;
-import dev.latvian.mods.kubejs.fluid.BoundFluidStackJS;
 import dev.latvian.mods.kubejs.fluid.FluidLike;
 import dev.latvian.mods.kubejs.fluid.InputFluid;
+import dev.latvian.mods.kubejs.item.ingredient.TagContext;
 
-public record IGInputFluid(FluidStack input) implements InputFluid {
+public record IGInputFluid(FluidTagInput input) implements InputFluid {
     @Override
     public long kjs$getAmount() {
         return input.getAmount();
@@ -14,18 +13,16 @@ public record IGInputFluid(FluidStack input) implements InputFluid {
 
     @Override
     public boolean kjs$isEmpty() {
-        return input().isEmpty();
+        return TagContext.INSTANCE.getValue().areTagsBound() ? input.getMatchingFluidStacks().isEmpty() : false;
     }
 
     @Override
     public FluidLike kjs$copy(long amount) {
-        FluidStack fs = this.input.copy();
-        fs.setAmount(amount);
-        return new BoundFluidStackJS(fs);
+        return new IGInputFluid(input.withAmount((int) amount));
     }
 
     @Override
     public boolean matches(FluidLike other) {
-        return InputFluid.super.matches(other);
+        return false;
     }
 }

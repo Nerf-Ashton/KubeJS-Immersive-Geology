@@ -115,7 +115,7 @@ dependencies {
     implementation fg.deobf("curse.maven:jei-238222:7920915")
 
     implementation fg.deobf("curse.maven:immersive-engineering-231951:6206989")
-    implementation fg.deobf("curse.maven:immersive-geology-370614:7648210")
+    implementation fg.deobf("curse.maven:immersive-geology-370614:8935684")
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
