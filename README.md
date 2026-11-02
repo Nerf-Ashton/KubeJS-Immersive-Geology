@@ -1,8 +1,12 @@
 # KubeJS Immersive Geology
 
-A KubeJS addon for [Immersive Geology](https://www.curseforge.com/minecraft/mc-mods/immersive-geology) built for Minecraft 1.20.1 (Forge) and KubeJS 6.
+A KubeJS addon for [Immersive Geology](https://www.curseforge.com/minecraft/mc-mods/immersive-geology) built for Forge on Minecraft 1.20.1 and [KubeJS](https://kubejs.com/).
 
 This addon allows modpack developers and players to register custom recipes for all machines and processing mechanics introduced by Immersive Geology using KubeJS server scripts (`server_scripts`).
+
+Keep in mind when working with Immersive Geology, many recipes can only output single items, though it may show up in JEI with multiple items.
+
+In addition, energy and time are optional for most recipes, and default to common values in Immersive Geology.
 
 ---
 
@@ -17,210 +21,212 @@ ServerEvents.recipes(event => {
 ```
 
 ### 1. Crystallizer
-Cool or crystallize solutions into items and secondary fluids.
-- **Parameters**: `(resultItem, inputItem, fluidResult, energy, time)`
+- **Parameters**: `(resultItem, inputFluid, fluidResult, energy?, time?)`
 ```javascript
-// Outputs 2 diamonds and 500mB water from 1 diamond block and 1000mB water tag, 5000 FE, 200 ticks
-event.recipes.immersivegeology.crystallizer('2x minecraft:diamond', 'minecraft:diamond_block', Fluid.of('minecraft:water', 500), 5000, 200)
-
-// Without fluid result (empty fluid output)
-event.recipes.immersivegeology.crystallizer('minecraft:quartz', 'minecraft:quartz_block', Fluid.empty(), 2000, 100)
+event.recipes.immersivegeology.crystallizer('minecraft:diamond', Fluid.of('minecraft:water', 500), Fluid.of('minecraft:water', 250), 2000, 100)
 ```
 
 ### 2. Ball Mill
-Grind down ores and geological materials into powders and crushed products.
-- **Parameters**: `(resultItem, inputItem, energy, time)`
+- **Parameters**: `(resultItem, inputItem, energy?, time?)`
 ```javascript
-event.recipes.immersivegeology.ballmill('2x minecraft:redstone', 'minecraft:redstone_ore', 4000, 150)
+event.recipes.immersivegeology.ballmill('4x minecraft:sand', 'minecraft:sandstone', 1000, 40)
 ```
 
 ### 3. Centrifuge
-Separate slurries and fluid mixtures into item products and distinct fluid outputs.
-- **Parameters**: `(resultItem, fluidInput, primaryFluidOut, secondaryFluidOut, energy, time)`
+An output item is required here by Immersive Geology.
+- **Parameters**: `(resultItem, fluidInput, primaryFluidOut, secondaryFluidOut?, energy?, time?)`
 ```javascript
-// Fluid inputs use FluidTagInput syntax ('#forge:lava:1000' or Fluid.of(...))
+// Fluid inputs use FluidTagInput syntax (Fluid.of(...))
 event.recipes.immersivegeology.centrifuge(
     'minecraft:obsidian',
-    '#forge:lava:1000',
-    Fluid.of('minecraft:water', 500),
-    Fluid.empty(),
-    8000,
-    300
+    Fluid.of('minecraft:lava', 500),
+    Fluid.of('minecraft:lava', 250),
+    null,
+    4000,
+    150
 )
 ```
 
 ### 4. Chemical Reactor
-Multi-input chemical processing supporting up to 1 item input, 3 fluid inputs, 1 item output, and 1 fluid output.
-- **Parameters**: `(resultItem, fluidResult, itemInput, fluidA, fluidB?, fluidC?, energy, time)`
+- **Parameters**: `(resultItem, fluidResult, itemInput, fluidA, fluidB?, fluidC?, energy?, time?)`
 ```javascript
 event.recipes.immersivegeology.chemical_reactor(
     'minecraft:emerald',
-    Fluid.of('minecraft:water', 250),
-    'minecraft:diamond',
-    '#forge:water:1000',
-    '#forge:lava:500',
-    null, // or Fluid.empty()
-    10000,
-    400
+    null,
+    'minecraft:coal',
+    Fluid.of('minecraft:water', 200),
+    null,
+    null,
+    5000,
+    100
 )
 ```
 
 ### 5. Small Chemical Reactor
-Compact chemical reactor supporting 1 item input, up to 2 fluid inputs, 1 item output, 1 fluid output, and acid damage rate.
-- **Parameters**: `(resultItem, fluidResult, itemInput, fluidA, fluidB?, damagePerSecond, energy, time)`
+- **Parameters**: `(resultItem, fluidResult, itemInput, fluidA, fluidB?, damagePerSecond?, energy?, time?)`
 ```javascript
 event.recipes.immersivegeology.small_chemical_reactor(
-    'minecraft:iron_ingot',
-    Fluid.empty(),
-    'minecraft:raw_iron',
-    '#forge:water:500',
+    'minecraft:gold_ingot',
     null,
-    2.0,  // damage per second
-    2500, // energy
-    100   // time
+    'minecraft:raw_gold',
+    Fluid.of('minecraft:water', 200),
+    null,
+    1,
+    2500,
+    80
 )
 ```
 
-### 6. Foundry
-Cast melted materials with custom molds.
-- **Parameters**: `(resultItem, inputItem, moldItem, energy, time)`
+### 6. Chemical Repair
+For restoring durability to the small chemical reactor.
+- **Parameters**: `(inputItem, time?)`
+```javascript
+event.recipes.immersivegeology.chemical_repair('immersiveengineering:drillhead_iron', 100)
+```
+
+### 7. Bulk Blast Furnace
+Inputs can be an item/ore tag (e.g. `'#forge:crushed_ore/acanthite'`) or a molten fluid tag.
+- **Parameters**: `(meltFluid, input, cokeRatio?, fluxRatio?, minYield?, maxYield?, heat?, time?, richMelt?, richCokeRatio?)`
+```javascript
+event.recipes.immersivegeology.bulk_blast_furnace(
+    Fluid.of('immersivegeology:fluid_silver', 144),
+    '#forge:crushed_ore/acanthite',
+    0.4,
+    0.4,
+    0.2,
+    0.85,
+    20,
+    100
+)
+```
+
+### 8. Bulk Blast Flux
+Registers a flux material for use in the Bulk Blast Furnace.
+- **Parameters**: `(inputItem, fluxValue?)`
+```javascript
+event.recipes.immersivegeology.bulk_blast_flux('minecraft:calcite', 2)
+```
+
+### 9. Foundry
+`moldItem` can be any graphite mold or compatible mold plate.
+- **Parameters**: `(resultItem, inputFluid, moldItem, energy?, time?)`
 ```javascript
 event.recipes.immersivegeology.foundry(
-    'minecraft:iron_axe',
-    '3x minecraft:iron_ingot',
-    'immersiveengineering:mold_plate',
-    6000,
-    200
+    'minecraft:iron_ingot',
+    Fluid.of('minecraft:lava', 250),
+    'immersivegeology:mold_plate_graphite',
+    1000,
+    50
 )
 ```
 
-### 7. Gravity Separator
-Separate minerals using water currents and centrifugal gravity, with chance-based byproducts.
-- **Parameters**: `(resultItem, inputItem, byproductItem, byproductChance, water, time)`
+### 10. Foundry Alloying
+- **Parameters**: `(resultFluid, inputFluids[], energy?, time?)`
+```javascript
+event.recipes.immersivegeology.foundry_alloying(
+    Fluid.of('immersivegeology:fluid_bronze', 4),
+    ['#forge:copper:3', '#forge:tin:1'],
+    16,
+    60
+)
+```
+
+### 11. Gravity Separator
+- **Parameters**: `(resultItem, inputItem, byproductItem, byproductChance, water?, time?)`
 ```javascript
 event.recipes.immersivegeology.gravity_separator(
     'minecraft:gold_nugget',
     'minecraft:gravel',
     'minecraft:flint',
-    0.25, // 25% chance for byproduct
-    250,  // mB water
-    100   // ticks
+    0.5,  // 50% chance for byproduct
+    100,  // mB water
+    60    // ticks
 )
 ```
 
-### 8. Industrial Sluice
-High-capacity hydraulic ore washing with multiple probabilistic byproducts.
-- **Parameters**: `(resultItem, inputItem, byproducts[], water, energy, time)`
+### 12. Pelletizer
+- **Parameters**: `(resultItem, inputItem, energy?, time?)`
 ```javascript
-event.recipes.immersivegeology.industrial_sluice(
-    'minecraft:raw_iron',
-    'minecraft:iron_ore',
-    [
-        Item.of('minecraft:raw_copper').withChance(0.5),
-        Item.of('minecraft:raw_gold').withChance(0.15)
-    ],
-    500,  // water
-    4000, // energy
-    160   // time
-)
+event.recipes.immersivegeology.pelletizer('minecraft:clay_ball', 'minecraft:clay', 500, 40)
 ```
 
-### 9. Pelletizer
-Form powders and crushed materials into dense pellets.
-- **Parameters**: `(resultItem, inputItem, energy, time)`
-```javascript
-event.recipes.immersivegeology.pelletizer('minecraft:clay_ball', 'minecraft:clay', 1500, 80)
-```
-
-### 10. Reverberation Furnace
-High-temperature smelting producing waste/slag.
-- **Parameters**: `(resultItem, inputItem, wasteItem, time)`
+### 13. Reverberation Furnace
+- **Parameters**: `(resultItem, inputItem, waste?, time?)`
 ```javascript
 event.recipes.immersivegeology.reverberation_furnace(
     'minecraft:copper_ingot',
     'minecraft:raw_copper',
-    'immersiveengineering:slag',
-    300
+    50, // produces 50 mB sulfur dioxide
+    100
 )
 ```
 
-### 11. Rotary Kiln
-Calcination and high-temperature rotary roasting.
-- **Parameters**: `(resultItem, inputItem, heat, time)`
+### 14. Rotary Kiln
+I recommend picking from these values for the heat, as other values may be difficult to sustain in game:
+1. LV: 30
+2. MV: 75
+3. HV: 120
+4. EHV: 165
+- **Parameters**: `(resultItem, inputItem, heat, time?)`
 ```javascript
-event.recipes.immersivegeology.rotary_kiln('minecraft:brick', 'minecraft:clay_ball', 800, 200)
+event.recipes.immersivegeology.rotary_kiln('minecraft:brick', 'minecraft:clay_ball', 100, 80)
 ```
 
-### 12. Bloomery & Bloomery Fuel
-Early-stage iron smelting bloomery and custom bloomery fuels.
-- **Bloomery Parameters**: `(resultItem, inputItem, time)`
+### 15. Bloomery & Bloomery Fuel
+- **Bloomery Parameters**: `(resultItem, inputItem, time?)`
 ```javascript
-event.recipes.immersivegeology.bloomery('minecraft:iron_ingot', 'minecraft:raw_iron', 600)
+event.recipes.immersivegeology.bloomery('minecraft:iron_ingot', 'minecraft:raw_iron', 120)
 ```
-- **Fuel Parameters**: `(fuelItem, time)`
+- **Fuel Parameters**: `(fuelItem, time?)`
 ```javascript
-event.recipes.immersivegeology.bloomery_fuel('minecraft:charcoal', 400)
-```
-
-### 13. Core Drill
-Extract deep geological fluid samples and drill cores.
-- **Parameters**: `(fluidResult, inputItem)`
-```javascript
-event.recipes.immersivegeology.coredrill(Fluid.of('minecraft:lava', 1000), 'minecraft:deepslate')
+event.recipes.immersivegeology.bloomery_fuel('minecraft:charcoal', 200)
 ```
 
-### 14. Geothermal Exchanger
-Harness heat from geothermal fluids or materials.
-- **Parameters**: `(fluidResult, inputItem, energy, time)`
+### 16. Core Drill
+Still WIP multiblock machine in Immersive Geology, but recipes can be defined.
+- **Parameters**: `(fluidResult, inputFluid)`
 ```javascript
-event.recipes.immersivegeology.geothermal_exchanger(Fluid.of('minecraft:water', 1000), 'minecraft:magma_block', 12000, 240)
+event.recipes.immersivegeology.coredrill(Fluid.of('immersivegeology:fluid_molten_mantle', 10), '#minecraft:water:1000')
 ```
 
-### 15. Geothermal Conversion
-Define heat-dependent block transformations.
+### 17. Geothermal Exchanger
+- **Parameters**: `(fluidResult, inputFluid, energy?, time?)`
+```javascript
+event.recipes.immersivegeology.geothermal_exchanger(Fluid.of('minecraft:water', 500), '#forge:lava:500', 3000, 100)
+```
+
+### 18. Geothermal Conversion
 - **Parameters**: `(transitionBlock, blockHeat, upperBoundBlock, upperHeat, lowerBoundBlock, lowerHeat)`
 ```javascript
 event.recipes.immersivegeology.geothermal_conversion(
     'minecraft:magma_block',
-    500,
+    300,
     'minecraft:lava',
-    1000,
+    600,
     'minecraft:obsidian',
-    200
+    100
 )
 ```
 
-### 16. Geothermal Biome
+### 19. Geothermal Biome
 Configure geothermal heat characteristics by biome ID, biome tag, or array of tags.
 - **Parameters**: `(biomeOrTag, minHeat, maxHeat)`
 ```javascript
-// By biome ID:
-event.recipes.immersivegeology.geothermal_biome('minecraft:desert', 200, 800)
-
 // By single biome tag:
 event.recipes.immersivegeology.geothermal_biome('#minecraft:is_overworld', 100, 500)
+event.recipes.immersivegeology.geothermal_biome('#forge:is_hot', 200, 800)
+
+// By biome ID:
+event.recipes.immersivegeology.geothermal_biome('minecraft:desert', 200, 800)
 
 // By array of biome tags:
 event.recipes.immersivegeology.geothermal_biome(['#minecraft:is_nether', '#minecraft:is_hot'], 400, 1200)
 ```
 
-### 17. Steam Turbine Fuel
-Register fluid fuels for steam turbines (supports both `turbine_fuel` and `tubrine_fuel`).
+### 20. Steam Turbine Fuel
+Register fluid fuels for steam turbines (supports both `turbine_fuel` and `tubrine_fuel`, since IG has a typo in its serializer registry name lol).
 - **Parameters**: `(fluidTag, burnTime, consumeAmount, outputRatio)`
 ```javascript
-event.recipes.immersivegeology.turbine_fuel('#forge:steam', 100, 10, 0.8)
-```
-
-### 18. Chemical Repair
-Restore durability to machine parts and equipment through chemical treatment.
-- **Parameters**: `(inputItem, time)`
-```javascript
-event.recipes.immersivegeology.chemical_repair('immersiveengineering:drillhead_iron', 150)
-```
-
-### 19. Geo Hint
-Configure geological exploration hints and rock composition data.
-- **Parameters**: `(materialIndex, materialType)`
-```javascript
-event.recipes.immersivegeology.geo_hint(1, 'granite')
+event.recipes.immersivegeology.turbine_fuel('#forge:steam', 50, 5, 0.5)
+event.recipes.immersivegeology.tubrine_fuel('#forge:steam', 100, 10, 0.75)
 ```

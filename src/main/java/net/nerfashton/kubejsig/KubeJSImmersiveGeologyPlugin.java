@@ -63,6 +63,7 @@ public class KubeJSImmersiveGeologyPlugin extends KubeJSPlugin {
         ig.register(name(CentrifugeRecipe.SERIALIZER), CentrifugeRecipeSchema.SCHEMA);
         ig.register(name(ChemicalRecipe.SERIALIZER), ChemicalReactorRecipeSchema.SCHEMA);
         ig.register(name(BasicChemicalRecipe.SERIALIZER), SmallChemicalReactorRecipeSchema.SCHEMA);
+        ig.register(name(ChemicalRepairRecipe.SERIALIZER), ChemicalRepairRecipeSchema.SCHEMA);
         ig.register(name(FoundryRecipe.SERIALIZER), FoundryRecipeSchema.SCHEMA);
         ig.register(name(FoundryAlloyRecipe.SERIALIZER), FoundryAlloyRecipeSchema.SCHEMA);
         ig.register(name(GravitySeparatorRecipe.SERIALIZER), GravitySeparatorRecipeSchema.SCHEMA);
@@ -77,11 +78,9 @@ public class KubeJSImmersiveGeologyPlugin extends KubeJSPlugin {
         ig.register(name(GeothermalExchangerRecipe.SERIALIZER), GeothermalExchangerRecipeSchema.SCHEMA);
         ig.register(name(GeothermalConversionRecipe.SERIALIZER), GeothermalConversionRecipeSchema.SCHEMA);
         ig.register(name(GeothermalBiomeRecipe.SERIALIZER), GeothermalBiomeRecipeSchema.SCHEMA);
-        ig.register(name(ChemicalRepairRecipe.SERIALIZER), ChemicalRepairRecipeSchema.SCHEMA);
         ig.register(name(TurbineFuel.SERIALIZER), TurbineFuelRecipeSchema.SCHEMA);
         ig.register("turbine_fuel", TurbineFuelRecipeSchema.SCHEMA);
-        ig.register(name(IGGeoRecipe.SERIALIZER), IGGeoHintRecipeSchema.SCHEMA);
-        ig.register(name(IGRecipeSerializers.MOLD_SHAPING_SERIALIZER), ShapelessRecipeSchema.SCHEMA);
+        // ig.register(name(IGGeoRecipe.SERIALIZER), IGGeoHintRecipeSchema.SCHEMA); //Does not work
     }
 
     private static String name(RegistryObject<?> reg) {
